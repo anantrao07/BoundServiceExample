@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Intent intent = new Intent(this , BoundService.class);
+        startService(intent);
         bindService(intent , boundServiceConnection,BIND_AUTO_CREATE);
 
 
@@ -38,7 +39,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
 
+
+                Toast.makeText(MainActivity.this, String.valueOf(boundService.randomGenerator()),Toast.LENGTH_SHORT).show();
+
+            }
+        };
+
+        Handler handler = new Handler();
+        handler.postDelayed(runnable,3000);
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(isBound){
+            unbindService(boundServiceConnection);
+            isBound = false;
+
+
+        }
     }
 
     private ServiceConnection boundServiceConnection = new ServiceConnection() {
@@ -48,18 +73,6 @@ public class MainActivity extends AppCompatActivity {
             BoundService.MyBinder binderBridge = (BoundService.MyBinder) service ;
             boundService = binderBridge.getService();
             isBound = true;
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-
-
-                        Toast.makeText(MainActivity.this, String.valueOf(boundService.randomGenerator()),Toast.LENGTH_SHORT).show();
-
-                }
-            };
-
-            Handler handler = new Handler();
-            handler.postDelayed(runnable,3000);
 
         }
 
